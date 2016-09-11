@@ -29,7 +29,7 @@ class Graph:
 		self.dfs_stack = deque()
 
 	#add nodes and verticies to graph
-	def add(from_node, to_node, weight):
+	def add_node(self, from_node, to_node, weight):
 		#check if key exists in data
 		temp_dict = {}
 		temp_dict[to_node] = weight
@@ -38,12 +38,20 @@ class Graph:
 		else:
 			self.nodes[from_node] = []
 			self.nodes[from_node].append(temp_dict)
-	# def bfs():
+	
+	def bfs():
+		print('bfs skeleton call')
+	def dfs():
+		print('dfs skeleton call')
+	def ucs():
+		print('ucs skeleton call')
 
-	# def dfs():
-
-	# def ucs():
-
+	def print_path(self):
+		print('print_path skeleton call')
+	
+	#for testing add
+	def print_nodes(self):
+		print(self.nodes)
 
 #check if input args is correct length
 def validateInput(len):
@@ -61,15 +69,30 @@ def main(argc, argv):
 	input_file = argv[1]
 	start_node = int(argv[2])
 	end_node = int(argv[3])
+	search = argv[4]
 
 	#initialize graph with start and end nodes
 	graph = Graph(start_node, end_node)
 
 	#add nodes to graph
-	# with open(input_file, 'r') as f:
-	# 	for line in f:
-	# 		graph.add(*line.split())
+	with open(input_file, 'r') as f:
+		for line in f:
+			graph.add_node(*line.split())
+	# graph.add_node(1,2,3)
+	# graph.add_node(2,3,4)
+	# graph.add_node(1,3,4)
+	graph.print_nodes()
 
+	#do the search
+	if search == 'BFS':
+		graph.bfs()
+	elif search == 'DFS':
+		graph.dfs()
+	elif search == 'UCS':
+		graph.ucs()
+
+	#print path
+	graph.print_path()
 
 
 
