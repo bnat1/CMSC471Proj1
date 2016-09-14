@@ -80,11 +80,12 @@ class Search:
 				if item['to_node'] not in self.visited:
 					self.visited[item['to_node']] = False
 					self.parents[item['to_node']] = None
+		#start_node is visited 
+		self.visited[self.graph.start_node] = True
 		#add start node to queue
 		self.open_list.appendleft(self.graph.start_node)
 		
 	def bfs(self):
-		self.visited[self.graph.start_node] = True
 		keep_going = True
 		while keep_going:
 			if len(self.open_list) != 0:
@@ -116,7 +117,48 @@ class Search:
 				#ran out of nodes to visit
 				keep_going = False
 	def dfs(self):
-		print("dfs skeleton")
+		keep_going = True
+		has_unvisited_child = False;
+		while keep_going:
+			#set current to last item on stack
+			if len(self.open_list) != 0:
+				current_node = self.open_list[-1]
+				if debug:
+					print ("current_node: ", current_node)
+				#make sure node has neighbors before continuing
+				#goal: check if neighbor
+				if current_node in self.graph.nodes:
+					#visit lowest unvisited child
+					for neighbor in self.graph.nodes[current_node]:
+						if debug:
+							print("neighbor: ", neighbor)
+						#only visit unvisited neighbors
+						if not self.visited[neighbor['to_node']]:
+							has_unvisited_child = True
+							self.open_list.append(neighbor['to_node'])
+							if debug:
+								print("open: ", self.open_list)
+							self.visited[neighbor['to_node']] = True
+							self.parents[neighbor['to_node']] = current_node
+							current_node = neighbor['to_node']
+							if debug:
+								print("visited: ", self.visited)
+								print("parents: ", self.parents)
+							if neighbor['to_node'] == self.graph.end_node:
+								#found the end node
+								keep_going = False
+								self.found = True
+							#break when there is at least one unvisited child
+							break
+						else:
+							has_unvisited_child = False;
+				else:
+					has_unvisited_child = False;
+				if not has_unvisited_child:
+					self.open_list.pop()
+			else:
+				#ran out of nodes to visit
+				keep_going = False
 	#print path
 	def ucs(self):
 		print("ucs skeleton")
