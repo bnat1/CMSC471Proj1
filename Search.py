@@ -43,14 +43,6 @@ class Graph:
 		else:
 			self.nodes[from_node] = []
 			self.nodes[from_node].append(temp_dict)
-	def dfs(self):
-		print('dfs skeleton call')
-	def ucs(self):
-		print('ucs skeleton call')
-
-	def print_path(self):
-		print('print_path skeleton call')
-	
 	#for testing add
 	def print_nodes(self):
 		print(self.nodes)
@@ -69,19 +61,24 @@ class Search:
 		self.found = False		
 		self.visited = {}
 		self.parents = {}
+		self.costs = {}
 		self.open_list = deque()
 		self.path = []
-		#initialize visited and parent dictionary
+		#initialize visited and parent, and cost dictionary
 		for key, value in self.graph.nodes.items():
 			if key not in self.visited.items():
 				self.visited[key] = False
 				self.parents[key] = None
+				self.costs[key] = float("inf")
 			for item in value:
 				if item['to_node'] not in self.visited:
 					self.visited[item['to_node']] = False
 					self.parents[item['to_node']] = None
+					self.costs[item['to_node']] = float("inf")
 		#start_node is visited 
 		self.visited[self.graph.start_node] = True
+		#no weight for start node
+		self.costs[self.graph.start_node] = 0
 		#add start node to queue
 		self.open_list.appendleft(self.graph.start_node)
 		
@@ -161,7 +158,65 @@ class Search:
 				keep_going = False
 	#print path
 	def ucs(self):
-		print("ucs skeleton")
+		current_node = self.graph.start_node
+		#for current node, look at unvisied neibors, calcuate 
+		#distance to this node + distance from this to neighbor
+		keep_going = True
+		while(keep_going):
+			#check every neighbor of current_node
+			if debug:
+				print ("current node: ", current_node)
+			self.visited[current_node] = True
+			if debug:
+				print ("visited: ", self.visited)
+			#make sure current node has children before trying to visit them
+			if current_node in self.graph.nodes:
+				for neighbor in self.graph.nodes[current_node]:
+					#if neighbor not visted yet:
+					if not self.visited[neighbor['to_node']]:
+						potential_distance = self.costs[current_node] + neighbor['edge_weight']
+						if debug:
+							print("looking at ", neighbor['to_node'])
+							print("potential distance: ", potential_distance)
+						#check if potential distance is better than tentative distance
+						if potential_distance < self.costs[neighbor['to_node']]:
+							#update cost, parent of neighbor
+							self.costs[neighbor['to_node']] = potential_distance
+							self.parents[neighbor['to_node']] = current_node
+							if debug:
+								print ("costs: ", self.costs)
+								print ("parents: ", self.parents)
+			#condition to be done with search
+			if current_node == self.graph.end_node:
+				if debug:
+					print("found")
+				self.found = True
+				keep_going = False
+			#next current node is the one with the smallest weight
+			#visited is false and minimal cost, and has a parent
+			unvisited_discovered_nodes = []
+			candidate_lowest_costs = {}
+			for key, value in self.visited.items():
+				if not value and self.parents[key] != None:
+					unvisited_discovered_nodes.append(key)
+			if debug:
+				print("unvisted discovered nodes: ", unvisited_discovered_nodes)
+			#check if any unvisited left
+			if len(unvisited_discovered_nodes) > 0:
+				for node in unvisited_discovered_nodes:
+					candidate_lowest_costs[node] = self.costs[node]
+				#find minimum cost in dictionary
+				#http://stackoverflow.com/questions/3282823/get-key-with-the-least-value-from-a-dictionary
+				if debug:
+					print ("candidate lowest costs: ",candidate_lowest_costs)
+				current_node = min(candidate_lowest_costs, key=candidate_lowest_costs.get)
+				if debug:
+					print("lowest discovered unvisited node: %d, with value %d", current_node, self.costs[current_node])
+			else:
+				#not found, and no more nodes to visit
+				keep_going = False
+
+
 	def print_path(self):
 		current_node = self.graph.end_node
 		if self.found:
@@ -194,7 +249,9 @@ def main(argc, argv):
 	#add nodes to graph
 	with open(input_file, 'r') as f:
 		for line in f:
-			graph.add_node(*line.split())
+			#line isn't whitespace
+			if line.strip() != '':
+				graph.add_node(*line.split())
 	
 	#sort children nodes in graph
 	graph.sort_neighbors()
@@ -212,6 +269,7 @@ def main(argc, argv):
 
 	#print path to node
 	search.print_path()
+	
 #call main if script
 if __name__ == '__main__':
 	main(len(sys.argv), sys.argv)
